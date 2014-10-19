@@ -20,11 +20,7 @@
     // custom nav bar image
     UIImage *navBackgroundImage = [UIImage imageNamed:@"TitleBarWithLogo"];
     [[UINavigationBar appearance] setBackgroundImage:navBackgroundImage forBarMetrics:UIBarMetricsDefault];
-    
-    // custom tab bar images
-    //    self.topDVDItem.image = [UIImage imageNamed:@"DVDIcon"];
-//    self.topDVDItem.image = [UIImage imageNamed:@"TitleBarWithLogo"];
-    
+
     // custom nav bar text
     NSShadow *shadow = [[NSShadow alloc] init];
     shadow.shadowColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.8];

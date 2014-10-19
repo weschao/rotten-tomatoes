@@ -11,7 +11,7 @@
 #import "MovieDetailsViewController.h"
 #import "UIImageView+AFNetworking.h"
 
-@interface MoviesViewController ()<UITableViewDataSource, UITableViewDelegate, UITabBarDelegate>
+@interface MoviesViewController ()<UITableViewDataSource, UITableViewDelegate, UITabBarDelegate, UISearchBarDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property NSArray* topRentals;
@@ -33,7 +33,23 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+
+    // set the tab bar item images and the tint color for selected images to match the nav bar color
+    self.topDVDItem.image = [[UIImage imageNamed:@"DVDIcon"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    self.topDVDItem.selectedImage = [[UIImage imageNamed:@"DVDIcon"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];;
+
+    self.boxOfficeItem.image = [[UIImage imageNamed:@"MovieIcon"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    self.boxOfficeItem.selectedImage = [[UIImage imageNamed:@"MovieIcon"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];;
     
+    self.mainTabBar.tintColor = [UIColor colorWithRed:58.0/255.0f green:147.0/255.0f blue:36.0/255.0f alpha:1.0f];
+
+    // add a search button
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]
+                                              initWithBarButtonSystemItem:UIBarButtonSystemItemSearch
+                                              target:self
+                                              action:@selector(onSearchButton)];
+
+
     self.networkErrorView.hidden = YES;
 
     [self.networkErrorOKButton addTarget:self action:@selector(clearNetworkErrorView) forControlEvents:UIControlEventTouchUpInside];
@@ -110,6 +126,27 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void) onSearchButton
+{
+    self.movieSearchBar.alpha = 0.0;
+    [UIView beginAnimations:@"fade in" context:nil];
+    [UIView setAnimationDuration:0.5];
+    self.movieSearchBar.alpha = 1.0;
+    self.movieSearchBar.hidden = NO;
+    [UIView commitAnimations];
+
+    //TODO: slide the table view down
+
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    NSLog(searchText);
+}
+
+- (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar {
+    self.movieSearchBar.hidden = YES;
 }
 
 -(void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item

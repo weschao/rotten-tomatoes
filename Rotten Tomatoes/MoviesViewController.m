@@ -142,6 +142,8 @@
     }
     else
     {
+        [self.view endEditing:YES];
+        
         [UIView beginAnimations:@"fade out" context:nil];
         [UIView setAnimationDuration:0.5];
         self.movieSearchBar.alpha = 1.0;
@@ -188,8 +190,9 @@
     return YES;
 }
 
-- (void) tableView: (UITableView *) tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-
+- (void) tableView: (UITableView *) tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    sleep (1);
     MovieDetailsViewController* mdvc = [[MovieDetailsViewController alloc] init];
     mdvc.movie = self.movies[indexPath.row];
     [self.navigationController pushViewController:mdvc animated:YES];

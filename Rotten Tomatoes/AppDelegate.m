@@ -7,16 +7,50 @@
 //
 
 #import "AppDelegate.h"
+#import "MoviesViewController.h"
 
 @interface AppDelegate ()
 
 @end
 
-@implementation AppDelegate
-
+@implementation AppDelegate 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+
+    // custom nav bar image
+    UIImage *navBackgroundImage = [UIImage imageNamed:@"TitleBarWithLogo"];
+    [[UINavigationBar appearance] setBackgroundImage:navBackgroundImage forBarMetrics:UIBarMetricsDefault];
+    
+    // custom tab bar images
+    //    self.topDVDItem.image = [UIImage imageNamed:@"DVDIcon"];
+//    self.topDVDItem.image = [UIImage imageNamed:@"TitleBarWithLogo"];
+    
+    // custom nav bar text
+    NSShadow *shadow = [[NSShadow alloc] init];
+    shadow.shadowColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.8];
+    shadow.shadowOffset = CGSizeMake(0, 1);
+    [[UINavigationBar appearance] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                          [UIColor whiteColor], NSForegroundColorAttributeName,
+                                                          shadow, NSShadowAttributeName, nil]];
+    [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+
+    
+    // initialize the url cache
+    NSUInteger cacheSizeMemory = 500*1024*1024; // 500 MB
+    NSUInteger cacheSizeDisk = 500*1024*1024; // 500 MB
+    NSURLCache *sharedCache = [[NSURLCache alloc] initWithMemoryCapacity:cacheSizeMemory diskCapacity:cacheSizeDisk diskPath:@"nsurlcache"];
+    [NSURLCache setSharedURLCache:sharedCache];
+    sleep(1);
+    
+    // create and display the main view
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+
+    MoviesViewController *vc = [[MoviesViewController alloc] init];
+    UINavigationController *nvc = [[UINavigationController alloc] initWithRootViewController:vc];
+    
+    self.window.rootViewController = nvc;
+    [self.window makeKeyAndVisible];
+
     return YES;
 }
 

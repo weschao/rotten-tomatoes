@@ -15,6 +15,7 @@
 @property (weak, nonatomic) IBOutlet UITabBarItem *topDVDItem;
 @property (weak, nonatomic) IBOutlet UITabBarItem *boxOfficeItem;
 @property (weak, nonatomic) IBOutlet UITabBar *mainTabBar;
+@property (weak, nonatomic) IBOutlet UISearchBar *movieSearchBar;
 
 @property (weak, nonatomic) IBOutlet UIImageView *testImageView;
 

@@ -14,7 +14,7 @@
 @interface MoviesViewController ()<UITableViewDataSource, UITableViewDelegate, UITabBarDelegate, UISearchBarDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
-@property NSArray* topRentals;
+@property NSArray* movies;
 @property UIRefreshControl *refreshControl;
 @property UIActivityIndicatorView *loadingView;
 @property NSString *rottenTomatoesUrlString;
@@ -43,15 +43,16 @@
     
     self.mainTabBar.tintColor = [UIColor colorWithRed:58.0/255.0f green:147.0/255.0f blue:36.0/255.0f alpha:1.0f];
 
-    // add a search button
+    // search button and search bar
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]
                                               initWithBarButtonSystemItem:UIBarButtonSystemItemSearch
                                               target:self
                                               action:@selector(onSearchButton)];
+    self.movieSearchBar.hidden = YES;
+    self.movieSearchBar.delegate = self;
 
-
+    // network error dialog
     self.networkErrorView.hidden = YES;
-
     [self.networkErrorOKButton addTarget:self action:@selector(clearNetworkErrorView) forControlEvents:UIControlEventTouchUpInside];
 
     self.mainTabBar.delegate = self;
@@ -92,8 +93,7 @@
 {
     // make a request for data
     NSURL *url = [NSURL URLWithString:self.rottenTomatoesUrlString];
-//    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:10];
-    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:2*60]; // New line
+    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:10];
 
     // DEBUG: Check the cache.
     NSCachedURLResponse *cachedResponse = [[NSURLCache sharedURLCache] cachedResponseForRequest:request];
@@ -104,7 +104,7 @@
         if (data) {
             NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         
-            self.topRentals = responseDictionary[@"movies"];
+            self.movies = responseDictionary[@"movies"];
             [self.moviesTableView reloadData];
         }
         else {
@@ -130,23 +130,41 @@
 
 - (void) onSearchButton
 {
-    self.movieSearchBar.alpha = 0.0;
-    [UIView beginAnimations:@"fade in" context:nil];
-    [UIView setAnimationDuration:0.5];
-    self.movieSearchBar.alpha = 1.0;
-    self.movieSearchBar.hidden = NO;
-    [UIView commitAnimations];
-
     //TODO: slide the table view down
+    if (self.movieSearchBar.hidden)
+    {
+        self.movieSearchBar.alpha = 0.0;
+        [UIView beginAnimations:@"fade in" context:nil];
+        [UIView setAnimationDuration:0.5];
+        self.movieSearchBar.alpha = 1.0;
+        self.movieSearchBar.hidden = NO;
+        [UIView commitAnimations];
+    }
+    else
+    {
+        [UIView beginAnimations:@"fade out" context:nil];
+        [UIView setAnimationDuration:0.5];
+        self.movieSearchBar.alpha = 1.0;
+        [UIView commitAnimations];
+        self.movieSearchBar.hidden = YES;
+        [self reloadData];
+    }
 
 }
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
-    NSLog(searchText);
-}
+    // if the user just erased all the text, load all the movies to start a new search
+    if ([searchText isEqual:@""])
+        [self reloadData];
 
-- (void)searchBarTextDidEndEditing:(UISearchBar *)searchBar {
-    self.movieSearchBar.hidden = YES;
+    // otherwise, filter movies based on the search request
+    else
+    {
+        NSPredicate *searchPredicate = [NSPredicate predicateWithFormat:@"title CONTAINS[c] %@", searchText];
+        self.movies = [self.movies filteredArrayUsingPredicate:searchPredicate];
+    
+        [self.moviesTableView reloadData];
+    }
 }
 
 -(void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item
@@ -173,19 +191,19 @@
 - (void) tableView: (UITableView *) tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
     MovieDetailsViewController* mdvc = [[MovieDetailsViewController alloc] init];
-    mdvc.movie = self.topRentals[indexPath.row];
+    mdvc.movie = self.movies[indexPath.row];
     [self.navigationController pushViewController:mdvc animated:YES];
 }
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.topRentals.count;
+    return self.movies.count;
 }
 
 - (UITableViewCell *) tableView: (UITableView *) tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     MovieCell *cell = [[MovieCell alloc] init];
     cell = [self.moviesTableView dequeueReusableCellWithIdentifier:@"MovieCell"];
     
-    NSDictionary *movie = self.topRentals[indexPath.row];
+    NSDictionary *movie = self.movies[indexPath.row];
 
     // get the low res image
     NSString *lowResPhotoUrl = [movie valueForKeyPath:@"posters.thumbnail"];
